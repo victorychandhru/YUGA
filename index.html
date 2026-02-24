@@ -9,8 +9,13 @@
 
 <style>
 
+/* ===========================
+   GLOBAL THEME
+=========================== */
+
 :root{
     --bg-deep: #05070d;
+    --bg-mid: #0a0f1c;
     --cyan: #00eaff;
     --violet: #7a5cff;
     --text: #EAEAEA;
@@ -27,38 +32,63 @@ body{
     overflow-x:hidden;
 }
 
-/* Background Glow */
+/* ===========================
+   ANIMATED GALAXY BACKGROUND
+=========================== */
+
 body::before{
     content:"";
     position:fixed;
     inset:0;
     background:
         radial-gradient(circle at 20% 30%, rgba(122,92,255,0.15), transparent 40%),
-        radial-gradient(circle at 80% 60%, rgba(0,234,255,0.12), transparent 40%);
+        radial-gradient(circle at 80% 60%, rgba(0,234,255,0.12), transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03), transparent 60%);
     animation:nebulaDrift 25s infinite alternate ease-in-out;
-    z-index:-1;
+    z-index:-2;
 }
 
 @keyframes nebulaDrift{
-    0%{transform:scale(1);}
-    100%{transform:scale(1.1);}
+    0%{transform:scale(1) translate(0,0);}
+    100%{transform:scale(1.1) translate(-3%,3%);}
 }
 
-/* Section */
+/* Particle Canvas */
+
+#particles{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+}
+
+/* ===========================
+   SECTION BASE STYLE
+=========================== */
+
 section{
     min-height:100vh;
     padding:120px 10%;
     display:flex;
     flex-direction:column;
     justify-content:center;
+    position:relative;
+    transition:opacity 1s ease, transform 1s ease;
+    opacity:0;
+    transform:translateY(60px);
 }
+
+section.visible{
+    opacity:1;
+    transform:translateY(0);
+}
+
+h1,h2{font-weight:800;letter-spacing:1px;}
 
 h1{
     font-size:3.5rem;
     background:linear-gradient(90deg,var(--cyan),var(--violet));
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-    margin-bottom:20px;
 }
 
 h2{
@@ -74,33 +104,47 @@ p{
     max-width:900px;
 }
 
-/* Logo */
-.hero{
-    text-align:center;
-    align-items:center;
-}
+/* HERO */
+
+.hero{text-align:center;align-items:center;}
 
 .hero img{
-    width:260px;
-    margin-bottom:30px;
+    width:320px;
+    margin-bottom:40px;
+    animation:fadeIn 2s ease forwards;
+}
+
+.hero h1{margin-bottom:20px;animation:fadeIn 3s ease forwards;}
+.hero p{font-size:1.3rem;color:var(--text);animation:fadeIn 4s ease forwards;}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(20px);}
+    to{opacity:1;transform:translateY(0);}
 }
 
 /* Equation */
+
 .equation{
-    margin-top:20px;
+    margin-top:30px;
     padding:20px;
-    border:1px solid rgba(0,234,255,0.3);
+    border:1px solid rgba(0,234,255,0.2);
     border-radius:8px;
     font-family:monospace;
+    font-size:1.1rem;
     color:var(--cyan);
 }
 
-/* Visual Box */
+/* Visual Placeholder */
+
 .visual-placeholder{
     margin-top:40px;
-    height:320px;
-    border:1px solid rgba(122,92,255,0.4);
-    border-radius:15px;
+    height:280px;
+    border:1px solid rgba(122,92,255,0.3);
+    border-radius:10px;
+    background:radial-gradient(circle, rgba(122,92,255,0.2), transparent 70%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
     overflow:hidden;
 }
 
@@ -108,24 +152,34 @@ p{
     width:100%;
     height:100%;
     object-fit:cover;
+    border-radius:10px;
 }
 
 /* Grid */
+
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
     gap:30px;
-    margin-top:40px;
+    margin-top:50px;
 }
 
 .card{
     padding:30px;
-    background:rgba(15,20,35,0.7);
-    border:1px solid rgba(0,234,255,0.2);
+    background:rgba(15,20,35,0.6);
+    border:1px solid rgba(0,234,255,0.15);
     border-radius:12px;
+    transition:.4s ease;
+}
+
+.card:hover{
+    transform:translateY(-10px);
+    border-color:var(--cyan);
+    box-shadow:0 0 25px rgba(0,234,255,0.2);
 }
 
 /* Footer */
+
 footer{
     min-height:60vh;
     display:flex;
@@ -136,8 +190,16 @@ footer{
 }
 
 footer img{
-    width:180px;
-    margin-bottom:20px;
+    width:200px;
+    margin-bottom:40px;
+}
+
+footer p{color:var(--text);}
+
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{
+    background:linear-gradient(var(--cyan),var(--violet));
+    border-radius:5px;
 }
 
 </style>
@@ -145,48 +207,118 @@ footer img{
 
 <body>
 
+<canvas id="particles"></canvas>
+
 <!-- HERO -->
-<section class="hero">
+<section class="hero visible">
     <img src="YUGA_LOGO.png" alt="YUGA Logo">
     <h1>YUGA</h1>
     <p>Quantum Artificial Super Intelligence Multiverse Ecosystem</p>
 </section>
 
-<!-- Bloch -->
+<!-- INTRODUCTION -->
 <section>
     <h2>Quantum Computing Foundations</h2>
-    <div class="equation">|ψ⟩ = α|0⟩ + β|1⟩</div>
+    <p>
+        Quantum computing operates within complex Hilbert space, where qubits
+        exist in superposition states rather than deterministic binary states.
+        The quantum state is defined as:
+    </p>
+    <div class="equation">
+        |ψ⟩ = α|0⟩ + β|1⟩
+    </div>
+    <p>
+        The squared magnitudes |α|² and |β|² represent measurement probabilities,
+        constrained by normalization: |α|² + |β|² = 1.
+        This probabilistic amplitude structure enables exponential state scaling.
+    </p>
+
     <div class="visual-placeholder">
         <img src="bloch.png" alt="Bloch Sphere">
     </div>
 </section>
 
-<!-- Explosion -->
+<!-- QUANTUM MATHEMATICAL FOUNDATION -->
 <section>
     <h2>Quantum Mathematical State Growth</h2>
-    <div class="equation">Dimension = 2^n</div>
+    <p>
+        For n qubits, the state space expands exponentially:
+    </p>
+    <div class="equation">
+        Dimension = 2^n
+    </div>
+    <p>
+        This exponential growth produces high-dimensional vector structures
+        requiring advanced tensor compression strategies for simulation.
+    </p>
+
     <div class="visual-placeholder">
         <img src="explosion.png" alt="State Explosion">
     </div>
 </section>
 
-<!-- Spline -->
+<!-- ASI LAYER -->
+<section>
+    <h2>Artificial Super Intelligence Layer</h2>
+    <p>
+        The ASI layer evaluates multivariate state branches through recursive
+        optimization mechanisms and meta-learning frameworks.
+        It minimizes predictive loss functions:
+    </p>
+    <div class="equation">
+        L(θ) = E[(prediction − actual)^2]
+    </div>
+    <p>
+        Through iterative parameter updates, the system refines outcome selection
+        across quantum-inspired branch expansions.
+    </p>
+</section>
+
+<!-- METAVERSE LAB -->
 <section>
     <h2>Metaverse Laboratory Interface</h2>
+    <p>
+        A persistent 3D virtual laboratory environment enables researchers
+        to manipulate quantum variables, execute branch simulations,
+        and observe multidimensional outputs in immersive form.
+    </p>
+
     <div class="visual-placeholder">
         <img src="spline.png" alt="3D Spline Scene">
     </div>
 </section>
 
-<!-- Network -->
+<!-- MULTIVERSE -->
+<section>
+    <h2>Multiverse Simulation Model</h2>
+    <p>
+        A computational branching analogy models parallel decision states.
+        For n binary decision variables:
+    </p>
+    <div class="equation">
+        Branch Count ≈ 2^n
+    </div>
+    <p>
+        The ASI Decision Core evaluates and collapses optimal pathways
+        based on probabilistic cost evaluation.
+    </p>
+</section>
+
+<!-- NETWORK -->
 <section>
     <h2>Distributed Quantum Network Infrastructure</h2>
+    <p>
+        Distributed compute nodes form a secure mesh topology.
+        Encrypted communication channels maintain isolation,
+        while horizontal scalability enables capacity aggregation.
+    </p>
+
     <div class="visual-placeholder">
         <img src="network.png" alt="Network Mesh">
     </div>
 </section>
 
-<!-- Use Cases -->
+<!-- USE CASES -->
 <section>
     <h2>Use Cases</h2>
     <div class="grid">
@@ -198,13 +330,80 @@ footer img{
     </div>
 </section>
 
-<!-- Footer -->
+<!-- REVENUE MODEL -->
+<section>
+    <h2>Research Revenue Framework</h2>
+    <div class="grid">
+        <div class="card">Research Subscriptions</div>
+        <div class="card">Enterprise Licensing</div>
+        <div class="card">Private Quantum Node Hosting</div>
+        <div class="card">Institutional Contracts</div>
+    </div>
+</section>
+
+<!-- CONCLUSION -->
+<section>
+    <h2>Conclusion</h2>
+    <p>
+        YUGA represents a research-oriented ecosystem integrating
+        quantum mathematical abstraction, artificial super intelligence modeling,
+        immersive virtual environments, and distributed infrastructure.
+        It is positioned as a scientific computational framework,
+        not a physical quantum hardware claim.
+    </p>
+</section>
+
+<!-- FOOTER -->
 <footer>
     <img src="YUGA_LOGO.png" alt="YUGA Logo">
     <p>Durai Chandrasekar</p>
     <p>Founder & CEO of YUGA Foundation</p>
     <p>victorychandhru@gmail.com</p>
 </footer>
+
+<script>
+// Scroll reveal
+const sections=document.querySelectorAll("section");
+window.addEventListener("scroll",()=>{
+sections.forEach(sec=>{
+const rect=sec.getBoundingClientRect();
+if(rect.top<window.innerHeight-100){sec.classList.add("visible");}
+});
+});
+
+// Particles
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+for(let i=0;i<120;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+r:Math.random()*1.5,
+d:Math.random()*0.5
+});
+}
+
+function draw(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle="rgba(0,234,255,0.4)";
+particles.forEach(p=>{
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fill();
+p.y+=p.d;
+if(p.y>canvas.height){
+p.y=0;
+p.x=Math.random()*canvas.width;
+}
+});
+requestAnimationFrame(draw);
+}
+draw();
+</script>
 
 </body>
 </html>
